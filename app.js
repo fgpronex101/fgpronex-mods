@@ -69,7 +69,7 @@
      const path=`${session.user.id}/${Date.now()}-${safeName}`;
      const {error:upErr}=await db.storage.from("FGPRONEX BUCKET").upload(path,file,{upsert:false,contentType:"application/octet-stream"});
      if(upErr)throw upErr;
-     const {data:urlData}=.getPublicUrl(path);
+     const {data:urlData}=db.storage.from("FGPRONEX BUCKET").getPublicUrl(path);
      const row={name:$("modName").value.trim(),description:$("description").value.trim(),version:$("version").value.trim(),minecraft_version:$("mcVersion").value.trim(),loader:$("loader").value,category:$("category").value.trim(),file_path:path,download_url:urlData.publicUrl,created_by:session.user.id};
      const {error:dbErr}=await db.from("mods").insert(row);
      if(dbErr){await db.storage.from("FGPRONEX BUCKET").remove([path]);throw dbErr;}
