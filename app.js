@@ -32,12 +32,32 @@
    if(error){msg("loginMessage",error.message);return;}
    session=data.session; await checkAdmin();
  };
- async function checkAdmin(){
-   if(!session){$("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");return;}
-   const {data,error}=await db.from("admins").select("user_id").eq("user_id",session.user.id).maybeSingle();
-   if(error||!data){await db.auth.signOut();session=null;msg("loginMessage","This account is not authorized as an admin.");return;}
-   $("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("adminEmail").textContent=session.user.email;render();
- }
+ async function checkAdmin() {
+  if (!session) {
+    $("loginPanel").classList.remove("hidden");
+    $("dashboard").classList.add("hidden");
+    return;
+  }
+
+  const { data, error } = await db
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Admin check error:", error);
+    await db.auth.signOut();
+    session = null;
+    msg("loginMessage", error ? error.message : "This account is not authorized as an admin.");
+    $("loginPanel").classList.remove("hidden");
+    $("dashboard").classList.add("hidden");
+    return;
+  }
+
+  $("loginPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+                                                                }
  $("logout").onclick=async()=>{await db.auth.signOut();session=null;$("dashboard").classList.add("hidden");$("loginPanel").classList.remove("hidden");render();};
  $("uploadForm").onsubmit=async e=>{
    e.preventDefault(); if(!session){msg("uploadMessage","Please sign in again.");return;}
