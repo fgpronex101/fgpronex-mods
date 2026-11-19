@@ -67,12 +67,12 @@
    try{
      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
      const path=`${session.user.id}/${Date.now()}-${safeName}`;
-     const {error:upErr}=await db.storage.from("mod-files").upload(path,file,{upsert:false,contentType:"application/octet-stream"});
+     const {error:upErr}=await db.storage.from("FGPRONEX BUCKET").upload(path,file,{upsert:false,contentType:"application/octet-stream"});
      if(upErr)throw upErr;
-     const {data:urlData}=db.storage.from("mod-files").getPublicUrl(path);
+     const {data:urlData}=.getPublicUrl(path);
      const row={name:$("modName").value.trim(),description:$("description").value.trim(),version:$("version").value.trim(),minecraft_version:$("mcVersion").value.trim(),loader:$("loader").value,category:$("category").value.trim(),file_path:path,download_url:urlData.publicUrl,created_by:session.user.id};
      const {error:dbErr}=await db.from("mods").insert(row);
-     if(dbErr){await db.storage.from("mod-files").remove([path]);throw dbErr;}
+     if(dbErr){await db.storage.from("FGPRONEX BUCKET").remove([path]);throw dbErr;}
      msg("uploadMessage","Mod uploaded successfully.",true);$("uploadForm").reset();await loadMods();
    }catch(err){msg("uploadMessage",err.message||"Upload failed.");}
    finally{$("uploadButton").disabled=false;}
@@ -81,7 +81,7 @@
    if(!confirm("Delete this mod from the library?"))return;
    const mod=mods.find(m=>m.id===id);const {error}=await db.from("mods").delete().eq("id",id);
    if(error){alert(error.message);return;}
-   if(mod?.file_path)await db.storage.from("mod-files").remove([mod.file_path]);
+   if(mod?.file_path)await db.storage.from("FGPRONEX BUCKET").remove([mod.file_path]);
    await loadMods();
  }
  async function init(){
