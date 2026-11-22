@@ -247,151 +247,156 @@ function render() {
   };
 
   // ZIP to JAR upload
-  $("uploadForm").onsubmit = async e => {
-    e.preventDefault();
+// Upload files for all categories
+$("uploadForm").onsubmit = async e => {
+  e.preventDefault();
 
-    if (!session) {
-      msg("uploadMessage", "Please sign in again.");
-      return;
-    }
+  if (!session) {
+    msg("uploadMessage", "Please sign in again.");
+    return;
+  }
 
-    const file = $("modFile").files[0];
+  const file = $("modFile").files[0];
+  const type = $("uploadType").value;
 
-    if (!file) {
-      msg("uploadMessage", "Choose a ZIP file.");
-      return;
-    }
+  if (!file) {
+    msg("uploadMessage", "Choose a file.");
+    return;
+  }
 
-    if (!file.name.toLowerCase().endsWith(".zip")) {
-      msg("uploadMessage", "Only ZIP files are allowed.");
-      return;
-    }
+  const ext = file.name.split(".").pop().toLowerCase();
 
-    $("uploadButton").disabled = true;
+  if (type === "mods" && ext !== "zip") {
+    msg("uploadMessage", "Mods require a ZIP file.");
+    return;
+  }
 
-    let uploadedPath = null;
+  if (
+    (type === "resourcepacks" || type === "shaders") &&
+    ext !== "zip"
+  ) {
+    msg("uploadMessage", "Choose a ZIP file.");
+    return;
+  }
 
-    try {
-      msg("uploadMessage", "Loading ZIP converter...");
+  if (
+    type === "wallpapers" &&
+    !["png", "jpg", "jpeg", "webp"].includes(ext)
+  ) {
+    msg("uploadMessage", "Choose PNG, JPG or WEBP image.");
+    return;
+  }
 
-      const JSZip = await loadJSZip();
+  $("uploadButton").disabled = true;
+  let uploadedPath = null;
 
-      msg("uploadMessage", "Opening ZIP file...");
+  try {
+    let uploadBlob = file;
+    let uploadName = file.name;
+    let contentType = file.type || "application/octet-stream";
 
-      const outerZip = await JSZip.loadAsync(file);
-
-      const jarFiles = Object.values(outerZip.files).filter(
-        item =>
-          !item.dir &&
-          item.name.toLowerCase().endsWith(".jar")
-      );
-
-      if (jarFiles.length !== 1) {
-        throw new Error(
-          "ZIP must contain exactly one JAR file."
-        );
-      }
-
+    if (type === "mods") {
       msg("uploadMessage", "Extracting JAR...");
 
-      const jarEntry = jarFiles[0];
-      const jarBlob = await jarEntry.async("blob");
+      const JSZip = await loadJSZip();
+      const zip = await JSZip.loadAsync(file);
 
-      if (!jarBlob.size) {
-        throw new Error("The JAR file is empty.");
+      const jars = Object.values(zip.files).filter(
+        item => !item.dir &&
+        item.name.toLowerCase().endsWith(".jar")
+      );
+
+      if (jars.length !== 1) {
+        throw new Error("ZIP must contain exactly one JAR.");
       }
 
-      // Verify that the extracted JAR is a readable ZIP archive
-      const jarZip = await JSZip.loadAsync(jarBlob);
+      uploadBlob = await jars[0].async("blob");
 
-      const jarContents = Object.values(jarZip.files).filter(
+      if (!uploadBlob.size) {
+        throw new Error("JAR file is empty.");
+      }
+
+      const jarZip = await JSZip.loadAsync(uploadBlob);
+      const contents = Object.values(jarZip.files).filter(
         item => !item.dir
       );
 
-      if (!jarContents.length) {
-        throw new Error("The JAR archive is empty.");
+      if (!contents.length) {
+        throw new Error("JAR archive is empty.");
       }
 
-      const originalName = jarEntry.name.split("/").pop();
-
-      const safeName = originalName.replace(
-        /[^a-zA-Z0-9._-]/g,
-        "_"
-      );
-
-      uploadedPath =
-        `${session.user.id}/${Date.now()}-${safeName}`;
-
-      msg("uploadMessage", "Uploading extracted JAR...");
-
-      const { error: uploadError } = await db.storage
-        .from("FGPRONEX BUCKET")
-        .upload(uploadedPath, jarBlob, {
-          upsert: false,
-          contentType: "application/java-archive"
-        });
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = db.storage
-        .from("FGPRONEX BUCKET")
-        .getPublicUrl(uploadedPath);
-
-      const row = {
-        name: $("modName").value.trim(),
-        description: $("description").value.trim(),
-        version: $("version").value.trim(),
-        minecraft_version: $("mcVersion").value.trim(),
-        loader: $("loader").value,
-        category: $("category").value.trim(),
-        file_path: uploadedPath,
-        download_url: urlData.publicUrl,
-        created_by: session.user.id
-      };
-
-      msg("uploadMessage", "Saving mod information...");
-
-      const { error: databaseError } = await db
-        .from("mods")
-        .insert(row);
-
-      if (databaseError) throw databaseError;
-
-      uploadedPath = null;
-
-      msg(
-        "uploadMessage",
-        "JAR Mod uploaded successfully!",
-        true
-      );
-
-      $("uploadForm").reset();
-
-      await loadMods();
-
-    } catch (error) {
-      console.error("Mod upload error:", error);
-
-      if (uploadedPath) {
-        const { error: cleanupError } = await db.storage
-          .from("FGPRONEX BUCKET")
-          .remove([uploadedPath]);
-
-        if (cleanupError) {
-          console.error("Cleanup error:", cleanupError);
-        }
-      }
-
-      msg(
-        "uploadMessage",
-        error.message || "Upload failed."
-      );
-
-    } finally {
-      $("uploadButton").disabled = false;
+      uploadName = jars[0].name.split("/").pop();
+      contentType = "application/java-archive";
     }
-  };
 
+    const safeName = uploadName.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    uploadedPath =
+      `${session.user.id}/${Date.now()}-${safeName}`;
+
+    msg("uploadMessage", "Uploading file...");
+
+    const { error: uploadError } = await db.storage
+      .from("FGPRONEX BUCKET")
+      .upload(uploadedPath, uploadBlob, {
+        upsert: false,
+        contentType
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = db.storage
+      .from("FGPRONEX BUCKET")
+      .getPublicUrl(uploadedPath);
+
+    const row = {
+      name: $("modName").value.trim(),
+      description: $("description").value.trim(),
+      version: $("version").value.trim(),
+      minecraft_version: $("mcVersion").value.trim(),
+      loader: $("loader").value,
+      category: $("category").value.trim(),
+      upload_type: type,
+      file_path: uploadedPath,
+      download_url: urlData.publicUrl,
+      created_by: session.user.id
+    };
+
+    msg("uploadMessage", "Saving file information...");
+
+    const { error: databaseError } = await db
+      .from("mods")
+      .insert(row);
+
+    if (databaseError) throw databaseError;
+
+    uploadedPath = null;
+
+    msg("uploadMessage", "File uploaded successfully!", true);
+
+    $("uploadForm").reset();
+    await loadMods();
+
+  } catch (error) {
+    console.error("Upload error:", error);
+
+    if (uploadedPath) {
+      await db.storage
+        .from("FGPRONEX BUCKET")
+        .remove([uploadedPath]);
+    }
+
+    msg("uploadMessage", error.message || "Upload failed.");
+
+  } finally {
+    $("uploadButton").disabled = false;
+  }
+};
+
+// Delete mod
   // Delete mod
   async function removeMod(id) {
     if (!confirm("Delete this mod from the library?")) return;
