@@ -121,7 +121,6 @@ function render() {
   const sections = [
     ["resourcepacks", "resourcePackGrid"],
     ["shaders", "shaderGrid"],
-    ["wallpapers", "wallpaperGrid"]
   ];
 
   sections.forEach(([type, gridId]) => {
