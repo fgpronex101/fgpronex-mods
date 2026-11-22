@@ -408,8 +408,7 @@ $("uploadForm").onsubmit = async e => {
     $("uploadButton").disabled = false;
   }
 };
-
-// Delete mod
+  
   // Delete mod
   async function removeMod(id) {
     if (!confirm("Delete this mod from the library?")) return;
