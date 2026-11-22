@@ -285,13 +285,7 @@ $("uploadForm").onsubmit = async e => {
     return;
   }
 
-  if (
-    type === "wallpapers" &&
-    !["png", "jpg", "jpeg", "webp"].includes(ext)
-  ) {
-    msg("uploadMessage", "Choose PNG, JPG or WEBP image.");
-    return;
-  }
+
 
   $("uploadButton").disabled = true;
   let uploadedPath = null;
