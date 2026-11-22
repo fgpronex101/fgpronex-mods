@@ -175,6 +175,18 @@ function render() {
   }
 
   $("search").oninput = render;
+  // Change allowed file types
+function updateFileAccept() {
+  const type = $("uploadType").value;
+
+  $("modFile").accept =
+    type === "wallpapers"
+      ? ".png,.jpg,.jpeg,.webp"
+      : ".zip";
+}
+
+$("uploadType").onchange = updateFileAccept;
+updateFileAccept();
   $("loaderFilter").onchange = render;
   $("refreshMods").onclick = loadMods;
 
