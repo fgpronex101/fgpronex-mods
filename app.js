@@ -76,61 +76,79 @@
   });
 
   // Render mods
-  function render() {
-    const q = $("search").value.toLowerCase();
-    const loader = $("loaderFilter").value;
+  // Render all categories
+function render() {
+  const q = $("search").value.toLowerCase();
+  const loader = $("loaderFilter").value;
 
-    const list = mods.filter(m =>
-      (!loader || m.loader === loader) &&
-      (
-        (m.name || "") + " " +
-        (m.description || "") + " " +
-        (m.category || "")
-      ).toLowerCase().includes(q)
-    );
+  const list = mods.filter(m =>
+    m.upload_type === "mods" &&
+    (!loader || m.loader === loader) &&
+    (
+      (m.name || "") + " " +
+      (m.description || "") + " " +
+      (m.category || "")
+    ).toLowerCase().includes(q)
+  );
 
-    $("modCount").textContent = mods.length + " mods";
+  $("modCount").textContent = list.length + " mods";
 
-    $("modGrid").innerHTML = list.length
-      ? list.map(m => `
+  $("modGrid").innerHTML = list.length
+    ? list.map(m => `
+      <article class="mod-card">
+        <div class="card-top">
+          <span class="tag">${esc(m.loader || "Mod")}</span>
+          <span class="tag">${esc(m.category || "Minecraft Mod")}</span>
+        </div>
+        <h3>${esc(m.name)}</h3>
+        <p>${esc(m.description)}</p>
+        <div class="meta">
+          <span>Version ${esc(m.version)}</span>
+          <span>Minecraft ${esc(m.minecraft_version)}</span>
+        </div>
+        <div class="card-actions">
+          <a class="primary download"
+             href="${esc(m.download_url)}"
+             target="_blank" rel="noopener">
+             Download JAR ↗
+          </a>
+          ${session ? `<button class="danger delete" data-id="${esc(m.id)}">Delete</button>` : ""}
+        </div>
+      </article>
+    `).join("")
+    : '<div class="empty">No mods found yet.</div>';
+
+  const sections = [
+    ["resourcepacks", "resourcePackGrid"],
+    ["shaders", "shaderGrid"],
+    ["wallpapers", "wallpaperGrid"]
+  ];
+
+  sections.forEach(([type, gridId]) => {
+    const items = mods.filter(m => m.upload_type === type);
+    const grid = $(gridId);
+    if (!grid) return;
+
+    grid.innerHTML = items.length
+      ? items.map(m => `
         <article class="mod-card">
-          <div class="card-top">
-            <span class="tag">${esc(m.loader)}</span>
-            <span class="tag">${esc(m.category || "Minecraft Mod")}</span>
-          </div>
-
           <h3>${esc(m.name)}</h3>
           <p>${esc(m.description)}</p>
-
-          <div class="meta">
-            <span>Mod ${esc(m.version)}</span>
-            <span>Minecraft ${esc(m.minecraft_version)}</span>
-          </div>
-
-          <div class="card-actions">
-            <a class="primary download"
-               href="${esc(m.download_url)}"
-               target="_blank"
-               rel="noopener">
-               Download JAR ↗
-            </a>
-
-            ${session ? `
-              <button class="danger delete"
-                data-id="${esc(m.id)}">
-                Delete
-              </button>
-            ` : ""}
-          </div>
+          <a class="primary download"
+             href="${esc(m.download_url)}"
+             target="_blank" rel="noopener">
+             Download ↗
+          </a>
+          ${session ? `<button class="danger delete" data-id="${esc(m.id)}">Delete</button>` : ""}
         </article>
       `).join("")
-      : '<div class="empty">No mods found yet. Check back soon.</div>';
+      : '<div class="empty">No files uploaded yet.</div>';
+  });
 
-    document.querySelectorAll(".delete").forEach(button => {
-      button.onclick = () => removeMod(button.dataset.id);
-    });
-  }
-
+  document.querySelectorAll(".delete").forEach(button => {
+    button.onclick = () => removeMod(button.dataset.id);
+  });
+}
   // Load database mods
   async function loadMods() {
     if (!db) {
