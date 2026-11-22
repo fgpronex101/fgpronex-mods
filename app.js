@@ -177,13 +177,6 @@ function render() {
   // Change allowed file types
 function updateFileAccept() {
   $("modFile").accept = ".zip";
-} {
-  const type = $("uploadType").value;
-
-  $("modFile").accept =
-    type === "wallpapers"
-      ? ".png,.jpg,.jpeg,.webp"
-      : ".zip";
 }
 
 $("uploadType").onchange = updateFileAccept;
