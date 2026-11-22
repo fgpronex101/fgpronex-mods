@@ -108,7 +108,7 @@ function render() {
         </div>
         <div class="card-actions">
           <a class="primary download"
-             href="${esc(m.download_url)}?download"
+             href="${esc(m.download_url)}?download=${encodeURIComponent((m.file_path || "").split("/").pop().replace(/^\d+-/, ""))}"
              target="_blank" rel="noopener">
              Download JAR ↗
           </a>
