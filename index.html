@@ -62,7 +62,15 @@
 <form id="loginForm" class="stack"><label>Email<input id="email" type="email" autocomplete="username" required placeholder="Admin email"></label>
 <label>Password<input id="password" type="password" autocomplete="current-password" required placeholder="Admin password"></label>
 <button class="primary" type="submit">Sign in</button><div id="loginMessage" class="message"></div></form></div>
-<div id="dashboard" class="hidden"><div class="eyebrow">ADMIN DASHBOARD</div><h2>Publish a Mod</h2><p class="muted">Signed in as <span id="adminEmail"></span></p>
+<div id="dashboard" class="hidden"><div class="eyebrow">ADMIN DASHBOARD</div><h2>Publish a File</h2>
+<label>Upload Type
+  <select id="uploadType" required>
+    <option value="mods">Mods</option>
+    <option value="resourcepacks">Resource Packs</option>
+    <option value="shaders">Shaders</option>
+    <option value="wallpapers">Wallpapers</option>
+  </select>
+</label><p class="muted">Signed in as <span id="adminEmail"></span></p>
 <form id="uploadForm" class="stack"><label>Mod name<input id="modName" maxlength="80" required></label>
 <label>Description<textarea id="description" maxlength="2000" rows="4" required></textarea></label>
 <div class="two"><label>Mod version<input id="version" maxlength="30" required placeholder="1.0.0"></label><label>Minecraft version<input id="mcVersion" maxlength="30" required placeholder="1.21.11"></label></div>
