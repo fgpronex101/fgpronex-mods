@@ -176,6 +176,8 @@ function render() {
   $("search").oninput = render;
   // Change allowed file types
 function updateFileAccept() {
+  $("modFile").accept = ".zip";
+} {
   const type = $("uploadType").value;
 
   $("modFile").accept =
