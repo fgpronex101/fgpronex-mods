@@ -134,7 +134,7 @@ function render() {
           <h3>${esc(m.name)}</h3>
           <p>${esc(m.description)}</p>
           <a class="primary download"
-             href="${esc(m.download_url)}"
+             href="${esc(m.download_url)}?download=${encodeURIComponent((m.file_path || "").split("/").pop().replace(/^\d+-/, ""))}"
              target="_blank" rel="noopener">
              Download ↗
           </a>
