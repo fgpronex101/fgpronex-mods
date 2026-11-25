@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FGPRONEX Account</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d18;color:#fff;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
+.card{width:100%;max-width:420px;background:#111c30;padding:28px;border:1px solid #263b5d;border-radius:16px}
+h1{text-align:center;color:#39c5ff}
+p{text-align:center;color:#a9bad0}
+input{width:100%;padding:13px;margin:8px 0 15px;background:#080f1d;color:white;border:1px solid #345071;border-radius:8px}
+label{color:#d5e7ff}
+button{width:100%;padding:13px;border:0;border-radius:8px;background:#16a9e5;color:#001321;font-weight:bold;cursor:pointer;margin-top:8px}
+.switch{background:transparent;color:#43caff;border:1px solid #345071}
+.hidden{display:none}
+#message{font-size:14px;overflow-wrap:anywhere}
+a{color:#43caff}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>FGPRONEX</h1>
+<p>Community Account</p>
+
+<div id="signupBox">
+<h2>Create Account</h2>
+<form id="signupForm">
+<label>Username</label>
+<input id="username" maxlength="30" required placeholder="Your username">
+<label>Email</label>
+<input id="signupEmail" type="email" required placeholder="Email address">
+<label>Password</label>
+<input id="signupPassword" type="password" minlength="6" required placeholder="At least 6 characters">
+<button type="submit">Create Account</button>
+</form>
+<button class="switch" id="showLogin">Already have an account? Login</button>
+</div>
+
+<div id="loginBox" class="hidden">
+<h2>Login</h2>
+<form id="loginForm">
+<label>Email</label>
+<input id="loginEmail" type="email" required placeholder="Email address">
+<label>Password</label>
+<input id="loginPassword" type="password" required placeholder="Password">
+<button type="submit">Login</button>
+</form>
+<button class="switch" id="showSignup">Create a new account</button>
+</div>
+
+<p id="message"></p>
+<p><a href="index.html">← Back to Website</a></p>
+</div>
+
+<script>
+const { createClient } = supabase;
+const db = createClient(
+  window.FG_CONFIG.SUPABASE_URL,
+  window.FG_CONFIG.SUPABASE_ANON_KEY
+);
+
+const $ = id => document.getElementById(id);
+const message = text => $("message").textContent = text;
+
+$("showLogin").onclick = () => {
+  $("signupBox").classList.add("hidden");
+  $("loginBox").classList.remove("hidden");
+  message("");
+};
+
+$("showSignup").onclick = () => {
+  $("loginBox").classList.add("hidden");
+  $("signupBox").classList.remove("hidden");
+  message("");
+};
+
+$("signupForm").onsubmit = async e => {
+  e.preventDefault();
+  message("Creating account...");
+
+  const { data, error } = await db.auth.signUp({
+    email: $("signupEmail").value.trim(),
+    password: $("signupPassword").value,
+    options: {
+      data: { username: $("username").value.trim() }
+    }
+  });
+
+  if (error) return message(error.message);
+
+  if (data.session) {
+    location.href = "index.html";
+  } else {
+    message("Account created! Check your email to confirm, then login.");
+  }
+};
+
+$("loginForm").onsubmit = async e => {
+  e.preventDefault();
+  message("Logging in...");
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email: $("loginEmail").value.trim(),
+    password: $("loginPassword").value
+  });
+
+  if (error) return message(error.message);
+
+  if (data.session) location.href = "index.html";
+};
+</script>
+</body>
+  </html>
+  
