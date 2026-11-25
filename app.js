@@ -207,6 +207,7 @@ updateFileAccept();
     await checkAdmin();
   };
 
+  
   // Verify admin
   async function checkAdmin() {
     if (!session) {
@@ -222,15 +223,7 @@ updateFileAccept();
       .maybeSingle();
 
     if (error || !data) {
-      console.error("Admin check error:", error);
-
-      await db.auth.signOut();
-      session = null;
-
-      msg(
-        "loginMessage",
-        error ? error.message : "This account is not an admin."
-      );
+      console.log("This account is not an admin.");
 
       $("loginPanel").classList.remove("hidden");
       $("dashboard").classList.add("hidden");
@@ -240,6 +233,7 @@ updateFileAccept();
     $("loginPanel").classList.add("hidden");
     $("dashboard").classList.remove("hidden");
   }
+  
 
   // Logout
   $("logout").onclick = async () => {
