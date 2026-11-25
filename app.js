@@ -185,6 +185,68 @@ updateFileAccept();
   $("refreshMods").onclick = loadMods;
 
   // Admin login
+  
+  // User sign up
+  $("signupForm").onsubmit = async e => {
+    e.preventDefault();
+
+    if (!db) return msg("signupMessage", "Supabase is not ready.");
+
+    const username = $("signupUsername").value.trim();
+    const email = $("signupEmail").value.trim();
+    const password = $("signupPassword").value;
+
+    const { data, error } = await db.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username }
+      }
+    });
+
+    if (error) {
+      msg("signupMessage", error.message);
+      return;
+    }
+
+    msg(
+      "signupMessage",
+      data.session
+        ? "Account created successfully!"
+        : "Check your email to confirm your account."
+    );
+  };
+
+  // User login
+  $("userLoginForm").onsubmit = async e => {
+    e.preventDefault();
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email: $("userEmail").value.trim(),
+      password: $("userPassword").value
+    });
+
+    if (error) {
+      msg("userLoginMessage", error.message);
+      return;
+    }
+
+    session = data.session;
+    await checkAdmin();
+    render();
+
+    msg("userLoginMessage", "Login successful!");
+  };
+
+  // User logout
+  $("userLogout").onclick = async () => {
+    await db.auth.signOut();
+    session = null;
+    await checkAdmin();
+    render();
+    msg("userLoginMessage", "Logged out.");
+  };
+    
   $("loginForm").onsubmit = async e => {
     e.preventDefault();
 
