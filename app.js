@@ -20,6 +20,7 @@
 
   let mods = [];
   let session = null;
+  let isAdmin = false;
 
   const esc = value =>
     String(value ?? "").replace(/[&<>"']/g, c => ({
