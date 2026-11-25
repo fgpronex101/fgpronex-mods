@@ -33,7 +33,37 @@
 <div id="modGrid" class="mod-grid"><div class="empty">Loading mods…</div></div></section>
 <section id="about" class="about section"><div class="eyebrow">ABOUT THIS PROJECT</div><h2>Built for the Minecraft community.</h2><p>Browse mod details and download available files. Publishing is restricted to approved administrators.</p></section></main>
 <footer>© <span id="year"></span> FGPRONEX MODS · Not an official Minecraft product.</footer>
-<div id="adminModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card">
+
+<section id="userAccount" class="section">
+  <div class="eyebrow">COMMUNITY ACCOUNT</div>
+  <h2>Join FGPRONEX</h2>
+  <form id="signupForm" class="stack">
+    <label>Username
+      <input id="signupUsername" maxlength="30" required placeholder="Your username">
+    </label>
+    <label>Email
+      <input id="signupEmail" type="email" required placeholder="Your email">
+    </label>
+    <label>Password
+      <input id="signupPassword" type="password" minlength="6" required placeholder="At least 6 characters">
+    </label>
+    <button class="primary" type="submit">Create Account</button>
+    <div id="signupMessage" class="message"></div>
+  </form>
+  <form id="userLoginForm" class="stack">
+    <h3>Already have an account? Login</h3>
+    <label>Email
+      <input id="userEmail" type="email" required>
+    </label>
+    <label>Password
+      <input id="userPassword" type="password" required>
+    </label>
+    <button class="primary" type="submit">Login</button>
+    <div id="userLoginMessage" class="message"></div>
+  </form>
+  <button id="userLogout" type="button">Logout</button>
+  </section>
+  <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card">
 <button id="closeAdmin" class="close" aria-label="Close">×</button>
 <div id="loginPanel"><div class="eyebrow">RESTRICTED AREA</div><h2>Admin Login</h2><p class="muted">Sign in to upload, edit, or remove mods.</p>
 <form id="loginForm" class="stack"><label>Email<input id="email" type="email" autocomplete="username" required placeholder="Admin email"></label>
